@@ -57,7 +57,7 @@
 #include <fakemeta>
 
 #define PLUGIN "Dod MapSettings"
-#define VERSION "1.0"
+#define VERSION "1.0.1"
 #define AUTHOR "29th ID"
 
 #define CREATE_ENTITY(%1)		engfunc(EngFunc_CreateNamedEntity,engfunc(EngFunc_AllocString,%1))
@@ -81,7 +81,7 @@ public plugin_precache() {
 	g_cvar_Alliesparas = register_cvar("dod_map_alliesparas", "-1")
 	g_cvar_Axisparas = register_cvar("dod_map_axisparas", "-1")
 	g_cvar_Alliescountry = register_cvar("dod_map_alliescountry", "-1")
-	g_cvar_Weather = register_cvar("dod_map_weather", "0")
+	g_cvar_Weather = register_cvar("dod_map_weather", "-1")
 	g_cvar_Removeflags = register_cvar("dod_map_removeflags", "0")
 	g_cvar_Removetimer = register_cvar("dod_map_removetimer", "0")
 	g_cvar_Removemortars = register_cvar("dod_map_removemortars", "0")
