@@ -1,5 +1,5 @@
 [en]
-LEADERSAYREADY = %s Clan-Leader!^nSay ^"%s^" to start the match!
+LEADERSAYREADY = %s Clan-Leader!^nSay "%s" to start the match!
 CANTCHANGEMATCH = You can't change a running ClanMatch!
 MATCHBASELOADED = Settings from file dod_matchbase.cfg loaded!
 MATCHBASEMISSING = Failed to load match settings! File dod_matchbase.cfg does not exist!
@@ -8,7 +8,7 @@ MATCHNOTLIVE = DoD ClanMatch is not running!
 MATCHABORTED = ClanMatch has been aborted!
 REVOKEDREADY = Clan %s revoked ready-status!
 READYTOFIGHT = Clan %s is ready to fight!
-SAYREVOKE = Say ^"%s^" to revoke your ready-status!
+SAYREVOKE = Say "%s" to revoke your ready-status!
 LASTMINUTE = Last minute running
 MINREMAINING = %d min remaining
 CANTRESTART = DoD ClanMatch is NOT running! You can't restart the round!
@@ -32,7 +32,7 @@ MAPONCE = play each map once
 MAPTWICE = play each map twice
 
 [de]
-LEADERSAYREADY = %s Clan-Leader!^nSchreibe ^"%s^" in den Chat um zu beginnen!
+LEADERSAYREADY = %s Clan-Leader!^nSchreibe "%s" in den Chat um zu beginnen!
 CANTCHANGEMATCH = Du kannst ein laufendes Match nicht aendern!
 MATCHBASELOADED = Konfiguration erfolgreich aus Datei dod_matchbase.cfg geladen!
 MATCHBASEMISSING = Konfiguration NICHT geladen! Datei dod_matchbase.cfg existiert nicht!
@@ -41,7 +41,7 @@ MATCHNOTLIVE = DoD ClanMatch laeuft nicht!
 MATCHABORTED = ClanMatch wurde abgebrochen!
 REVOKEDREADY = Clan %s hat die Bereitschaft storniert!
 READYTOFIGHT = Clan %s is bereit fuer die Runde!
-SAYREVOKE = Schreibe ^"%s^" in den Chat um eure Bereitschaft zu stornieren!
+SAYREVOKE = Schreibe "%s" in den Chat um eure Bereitschaft zu stornieren!
 LASTMINUTE = Letzte Minute laeuft
 MINREMAINING = %d minuten verbleibend
 CANTRESTART = DoD ClanMatch laeuft NICHT! Du kannst die Runde nicht neustarten!
