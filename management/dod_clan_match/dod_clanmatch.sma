@@ -454,6 +454,8 @@
 #include <amxmodx>
 #include <amxmisc>
 #include <dodx>
+#include <hamsandwich>
+#include <fun>
 
 #define MAX_MAPS 64
 
@@ -488,6 +490,13 @@ new dod_cm_map12scoreallies
 new dod_cm_map22scoreaxis
 new dod_cm_map22scoreallies
 
+new bool:bFirstRound
+new bool:bStripWeapons
+new Float:fMatchStartTime
+new pCvar_NoWarmupWeapons
+new pCvar_TimeVoice
+
+
 public plugin_init()
 {
 	register_plugin("DoD ClanMatch","0.9","AMXX DoD Team")
@@ -510,6 +519,10 @@ public plugin_init()
 	register_clcmd("match_timelimit","cmd_timelimit",ADMIN_CVAR,"- set TimeLimit")
 	register_clcmd("say","cmd_readycancel")
 	register_clcmd("jointeam","spec_first")
+	register_clcmd("say","func_CheckChat")
+	register_clcmd("say_team","func_CheckChat")
+	register_clcmd("say_team timeleft","func_SayTimeLeft",0,"- displays timeleft")
+	register_clcmd("say timeleft","func_SayTimeLeft",0,"- displays timeleft")
 	register_menucmd(register_menuid("DoD ClanMatch Map1"),1023,"changemap1menu")
 	register_menucmd(register_menuid("DoD ClanMatch Map2"),1023,"changemap2menu")
 	register_menucmd(register_menuid("DoD ClanMatch Menu"),(1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<8),"match_menu")
@@ -534,6 +547,7 @@ public plugin_init()
 	register_event("HudText","axis_ready","bC","1=#Clan_axis_ready")
 	register_event("HudText","allies_ready","bC","1=#Clan_allies_ready")
 	register_event("TextMsg","match_start","bC","2&game_roundstart")
+	register_event("RoundState","func_RoundState","a","1=0")
 	set_task(15.0,"get_matchmaps")
 	dod_clanmatch = register_cvar("dod_clanmatch", "0")
 	dod_cm_mapsplayed = register_cvar("dod_cm_mapsplayed", "0")
@@ -551,6 +565,8 @@ public plugin_init()
 	dod_cm_map12scoreallies = register_cvar("dod_cm_map12scoreallies", "0")
 	dod_cm_map22scoreaxis = register_cvar("dod_cm_map22scoreaxis", "0")
 	dod_cm_map22scoreallies = register_cvar("dod_cm_map22scoreallies", "0")
+	pCvar_NoWarmupWeapons = register_cvar("dod_cm_nowarmupweapons","1")
+	pCvar_TimeVoice = get_cvar_pointer("amx_time_voice")
 	register_cvar("dod_cm_folder", "dod_clanmatch")
 	register_cvar("dod_cm_map1", "dod_avalanche")
 	register_cvar("dod_cm_map2", "dod_flash")
@@ -561,6 +577,709 @@ public plugin_init()
 	register_cvar("dod_cm_readysig", "ready")
 	register_cvar("dod_cm_cancelsig", "cancel")
 	register_dictionary("dod_clanmatch.txt")
+
+	RegisterHam(Ham_Spawn, "player", "func_HamSpawn", 1)
+}
+
+public func_HamSpawn(id)
+{
+	if( !matchrunning && get_pcvar_num(pCvar_NoWarmupWeapons)
+	    && get_pcvar_num(dod_clanmatch) && get_cvar_num("mp_clan_match") )
+	{
+		set_task(0.1,"func_StripWeapons",id,"",0,"",0)
+	}
+
+                    //        PROC              ; public func_HamSpawn(id)
+                    //       BREAK 
+                    //       BREAK 
+                    //    LOAD.pri              ; matchrunning
+                    //         NOT 
+                    //        JZER             
+                    //        PUSH              ; pCvar_NoWarmupWeapons
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(pCvar_NoWarmupWeapons)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //        PUSH              ; dod_clanmatch
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(dod_clanmatch)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_cvar_num("mp_clan_match")
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //   CONST.pri             
+                    //        JUMP             
+                    //    ZERO.pri 
+                    //        JZER             
+                    //       BREAK 
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.S              ; id
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; set_task(0.100000,"func_StripWeapons",id,"",0,"",0)
+                    //       STACK              ; free 8 cells
+                    //    ZERO.pri 
+                    //        RETN 
+}
+
+public func_StripWeapons(id)
+{
+	if( clansready != 1 && bStripWeapons && is_user_alive(id) )
+	{
+		strip_user_weapons(id)
+	}
+
+                    //        PROC              ; public func_StripWeapons(id)
+                    //       BREAK 
+                    //       BREAK 
+                    //    LOAD.pri              ; clansready
+                    //   CONST.alt             
+                    //        JNEQ             
+                    //    LOAD.pri              ; bool:bStripWeapons
+                    //    EQ.C.pri             
+                    //         JNZ             
+                    //    ZERO.pri 
+                    //        JUMP             
+                    //   CONST.pri             
+                    //        JZER             
+                    //      PUSH.S              ; id
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; is_user_alive(id)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //   CONST.pri             
+                    //        JUMP             
+                    //    ZERO.pri 
+                    //        JZER             
+                    //       BREAK 
+                    //      PUSH.S              ; id
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; strip_user_weapons(id)
+                    //       STACK              ; free 2 cells
+                    //    ZERO.pri 
+                    //        RETN 
+}
+
+public func_RoundState()
+{
+	if( clansready && get_pcvar_num(dod_clanmatch) && get_cvar_num("mp_clan_match") )
+	{
+		bStripWeapons = false
+	}
+                    //        PROC              ; public func_RoundState()
+                    //       BREAK 
+                    //       BREAK 
+                    //    LOAD.pri              ; clansready
+                    //    EQ.C.pri             
+                    //        JZER             
+                    //        PUSH              ; dod_clanmatch
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(dod_clanmatch)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_cvar_num("mp_clan_match")
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //   CONST.pri             
+                    //        JUMP             
+                    //    ZERO.pri 
+                    //        JZER             
+                    //       BREAK 
+                    //        ZERO              ; bool:bStripWeapons
+                    //    ZERO.pri 
+                    //        RETN 
+}
+
+public func_msgCurWeapon(msgid, msgdest, id)
+{
+	if( !matchrunning && get_pcvar_num(pCvar_NoWarmupWeapons)
+	    && get_pcvar_num(dod_clanmatch) && get_cvar_num("mp_clan_match") )
+	{
+		if( get_msg_arg_int(1) && is_user_alive(id) )
+		{
+			set_task(0.100000,"func_StripWeapons",id,"",0,"",0)
+		}
+	}
+                    //        PROC              ; public func_msgCurWeapon(msgid,msgdest,id)
+                    //       BREAK 
+                    //       BREAK 
+                    //    LOAD.pri              ; matchrunning
+                    //         NOT 
+                    //        JZER             
+                    //        PUSH              ; pCvar_NoWarmupWeapons
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(pCvar_NoWarmupWeapons)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //        PUSH              ; dod_clanmatch
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(dod_clanmatch)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_cvar_num("mp_clan_match")
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_msg_arg_int(1)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //      PUSH.S              ; id
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; is_user_alive(id)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //   CONST.pri             
+                    //        JUMP             
+                    //    ZERO.pri 
+                    //        JZER             
+                    //       BREAK 
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.S              ; id
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; set_task(0.100000,"func_StripWeapons",id,"",0,"",0)
+                    //       STACK              ; free 8 cells
+                    //    ZERO.pri 
+                    //        RETN 
+
+}
+
+public func_CheckChat(id)
+{
+	static sText[192]
+
+	if( matchrunning && get_pcvar_num(dod_clanmatch) && get_cvar_num("mp_clan_match") )
+	{
+		read_args(sText, charsmax(sText))
+
+		if( containi(sText,"%t") )
+		{
+			new iMatchTimeLeft = func_GetMatchTimeLeft()
+			
+			new sTimeLeft[7]
+			formatex(sTimeLeft, charsmax(sTimeLeft), "%d", iMatchTimeLeft)
+			replace(sText, charsmax(sText), "%t", sTimeLeft)
+			
+			new sCmd[10]
+			read_argv(0, sCmd, charsmax(sCmd))
+			engclient_cmd(id, sCmd, sText)
+
+			return PLUGIN_HANDLED_MAIN
+		}
+	}
+	
+	return PLUGIN_CONTINUE
+
+                    //        PROC              ; public func_CheckChat(id)
+                    //       BREAK 
+                    //       BREAK 
+                    //    LOAD.pri              ; matchrunning
+                    //        JZER             
+                    //        PUSH              ; dod_clanmatch
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(dod_clanmatch)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_cvar_num("mp_clan_match")
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //   CONST.pri             
+                    //        JUMP             
+                    //    ZERO.pri 
+                    //        JZER             
+                    //       BREAK 
+                    //                          ; static sText[192]
+                    //       BREAK 
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; read_args(sText[192]={""},191)
+                    //       STACK              ; free 3 cells
+                    //       BREAK 
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; containi(sText[192]={""},"%t")
+                    //       STACK              ; free 3 cells
+                    //   CONST.alt             
+                    //         JEQ             
+                    //       BREAK 
+                    //                          ; new iMatchTimeLeft
+                    //       STACK              ; allocate 1 cells
+                    //      PUSH.C             
+                    //        CALL              ; stock func_GetMatchTimeLeft()
+                    //  STOR.S.pri              ; iMatchTimeLeft
+                    //       BREAK 
+                    //                          ; new sTimeLeft[7]
+                    //       STACK              ; allocate 7 cells
+                    //    ZERO.pri 
+                    //    ADDR.alt             
+                    //        FILL              ; 7 cells
+                    //       BREAK 
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; iMatchTimeLeft
+                    //    SDIV.alt 
+                    //    MOVE.pri 
+                    //        HEAP             
+                    //      STOR.I 
+                    //    PUSH.alt 
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; iMatchTimeLeft
+                    //    SDIV.alt 
+                    //        HEAP             
+                    //      STOR.I 
+                    //    PUSH.alt 
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    PUSH.ADR              ; sTimeLeft[7]
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; formatex
+                    //       STACK              ; free 6 cells
+                    //        HEAP             
+                    //       BREAK 
+                    //    PUSH.ADR              ; sTimeLeft[7]
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; replace(sText[192]={""},191,"%t",sTimeLeft[7])
+                    //       STACK              ; free 5 cells
+                    //       BREAK 
+                    //                          ; new sCmd[10]
+                    //       STACK              ; allocate 10 cells
+                    //    ZERO.pri 
+                    //    ADDR.alt             
+                    //        FILL              ; 10 cells
+                    //       BREAK 
+                    //      PUSH.C             
+                    //    PUSH.ADR              ; sCmd[10]
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; read_argv(0,sCmd[10],9)
+                    //       STACK              ; free 4 cells
+                    //       BREAK 
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    PUSH.ADR              ; sCmd[10]
+                    //      PUSH.S              ; id
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; engclient_cmd(id,sCmd[10],sText[192]={""},"")
+                    //       STACK              ; free 5 cells
+                    //       BREAK 
+                    //   CONST.pri             
+                    //       STACK              ; free 18 cells
+                    //        RETN 
+                    //       BREAK 
+                    //    ZERO.pri 
+                    //        RETN 
+}
+
+public func_SayTimeLeft(id)
+{
+	if( get_pcvar_num(dod_clanmatch) && get_cvar_num("mp_clan_match") )
+	{
+		new iMatchTimeLeft
+		if( matchrunning )
+		{
+			iMatchTimeLeft = func_GetMatchTimeLeft()
+		}
+		else
+		{
+			iMatchTimeLeft = get_timeleft()
+		}
+
+		if( get_pcvar_num(pCvar_TimeVoice) )
+		{
+			new svoice[128]
+			setTimeVoice(svoice, charsmax(svoice), 0, iMatchTimeLeft)
+
+			client_cmd(id,"%s",svoice)
+			// client_print(0, print_chat, "") // Not sure what data is used here
+		}
+	}
+                    //        PROC              ; public func_SayTimeLeft(id)
+                    //       BREAK 
+                    //       BREAK 
+                    //        PUSH              ; dod_clanmatch
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(dod_clanmatch)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_cvar_num("mp_clan_match")
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //   CONST.pri             
+                    //        JUMP             
+                    //    ZERO.pri 
+                    //        JZER             
+                    //       BREAK 
+                    //                          ; new iMatchTimeLeft
+                    //      PUSH.C             
+                    //       BREAK 
+                    //    LOAD.pri              ; matchrunning
+                    //      SWITCH             
+                    //       BREAK 
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_timeleft()
+                    //       STACK              ; free 1 cells
+                    //  STOR.S.pri              ; iMatchTimeLeft
+                    //        JUMP             
+                    //       BREAK 
+                    //      PUSH.C             
+                    //        CALL              ; stock func_GetMatchTimeLeft()
+                    //  STOR.S.pri              ; iMatchTimeLeft
+                    //        JUMP             
+                    //     CASETBL 
+                    //    CASENONE              ; default
+                    //        CASE             
+                    //    CASEJUMP             
+                    //        CASE             
+                    //    CASEJUMP             
+                    //                          ; End of CASETBL
+                    //       BREAK 
+                    //        PUSH              ; pCvar_TimeVoice
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(pCvar_TimeVoice)
+                    //       STACK              ; free 2 cells
+                    //        JZER             
+                    //       BREAK 
+                    //                          ; new svoice[128]
+                    //       STACK              ; allocate 128 cells
+                    //    ZERO.pri 
+                    //    ADDR.alt             
+                    //        FILL              ; 128 cells
+                    //       BREAK 
+                    //      PUSH.S              ; iMatchTimeLeft
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    PUSH.ADR              ; svoice[128]
+                    //      PUSH.C             
+                    //        CALL              ; stock setTimeVoice(text[],len,flags,tmlf)
+                    //       BREAK 
+                    //    PUSH.ADR              ; svoice[128]
+                    //      PUSH.C             
+                    //      PUSH.S              ; id
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; client_cmd(id,"%s",svoice[128])
+                    //       STACK              ; free 4 cells
+                    //       STACK              ; free 128 cells
+                    //       BREAK 
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; iMatchTimeLeft
+                    //    SDIV.alt 
+                    //    MOVE.pri 
+                    //        HEAP             
+                    //      STOR.I 
+                    //    PUSH.alt 
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; iMatchTimeLeft
+                    //    SDIV.alt 
+                    //        HEAP             
+                    //      STOR.I 
+                    //    PUSH.alt 
+                    //      PUSH.C             
+                    //   CONST.pri             
+                    //        HEAP             
+                    //      STOR.I 
+                    //    PUSH.alt 
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; client_print
+                    //       STACK              ; free 8 cells
+                    //        HEAP             
+                    //       STACK              ; free 1 cells
+                    //       BREAK 
+                    //    ZERO.pri 
+                    //        RETN 
+}
+
+stock setTimeVoice(text[],len,flags=0,tmlf)
+{
+                    //        PROC              ; stock setTimeVoice(text[],len,flags,tmlf)
+                    //       BREAK 
+                    //       BREAK 
+                    //                          ; new temp[7][32]
+                    //       STACK              ; allocate 231 cells
+                    //    ZERO.pri 
+                    //    ADDR.alt             
+                    //        FILL              ; 231 cells
+                    //   CONST.pri             
+                    //    ADDR.alt             
+                    //        MOVS             
+                    //       BREAK 
+                    //                          ; new secs
+                    //       STACK              ; allocate 1 cells
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; tmlf
+                    //    SDIV.alt 
+                    //    MOVE.pri 
+                    //  STOR.S.pri              ; secs
+                    //       BREAK 
+                    //                          ; new mins
+                    //       STACK              ; allocate 1 cells
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; tmlf
+                    //    SDIV.alt 
+                    //  STOR.S.pri              ; mins
+                    //       BREAK 
+                    //  LOAD.S.pri              ; secs
+                    //    MOVE.alt 
+                    //    ZERO.pri 
+                    //       JSGEQ             
+                    //       BREAK 
+                    //      PUSH.C             
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  16
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //      PUSH.S              ; secs
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; num_to_word
+                    //       STACK              ; free 4 cells
+                    //       BREAK 
+                    //  LOAD.S.pri              ; flags
+                    //      INVERT 
+                    //   CONST.alt             
+                    //         AND 
+                    //        JZER             
+                    //       BREAK 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  20
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    MOVE.alt 
+                    //   CONST.pri             
+                    //        MOVS             
+                    //       BREAK 
+                    //  LOAD.S.pri              ; mins
+                    //   CONST.alt             
+                    //       JSLEQ             
+                    //       BREAK 
+                    //                          ; new hours
+                    //       STACK              ; allocate 1 cells
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; mins
+                    //    SDIV.alt 
+                    //  STOR.S.pri              ; hours
+                    //       BREAK 
+                    //      PUSH.C             
+                    //    ADDR.pri              ; temp[7][32]
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //      PUSH.S              ; hours
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; num_to_word
+                    //       STACK              ; free 4 cells
+                    //       BREAK 
+                    //  LOAD.S.pri              ; flags
+                    //      INVERT 
+                    //   CONST.alt             
+                    //         AND 
+                    //        JZER             
+                    //       BREAK 
+                    //  LOAD.S.pri              ; mins
+                    //   CONST.alt             
+                    //       JSLEQ             
+                    //       BREAK 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  4
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    MOVE.alt 
+                    //   CONST.pri             
+                    //        MOVS             
+                    //        JUMP             
+                    //       BREAK 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  4
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    MOVE.alt 
+                    //   CONST.pri             
+                    //        MOVS             
+                    //       BREAK 
+                    //   CONST.pri             
+                    //  LOAD.S.alt              ; mins
+                    //    SDIV.alt 
+                    //    MOVE.pri 
+                    //  STOR.S.pri              ; mins
+                    //       STACK              ; free 1 cells
+                    //       BREAK 
+                    //  LOAD.S.pri              ; mins
+                    //    MOVE.alt 
+                    //    ZERO.pri 
+                    //       JSGEQ             
+                    //       BREAK 
+                    //      PUSH.C             
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  8
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //      PUSH.S              ; mins
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; num_to_word
+                    //       STACK              ; free 4 cells
+                    //       BREAK 
+                    //  LOAD.S.pri              ; flags
+                    //      INVERT 
+                    //   CONST.alt             
+                    //         AND 
+                    //        JZER             
+                    //       BREAK 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  12
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    MOVE.alt 
+                    //   CONST.pri             
+                    //        MOVS             
+                    //       BREAK 
+                    //  LOAD.S.pri              ; flags
+                    //      INVERT 
+                    //   CONST.alt             
+                    //         AND 
+                    //        JZER             
+                    //       BREAK 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  24
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    MOVE.alt 
+                    //   CONST.pri             
+                    //        MOVS             
+                    //       BREAK 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  24
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  20
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  16
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  12
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  8
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //    ADDR.pri              ; temp[7][32]
+                    //       ADD.C              ; signed:  4
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //    ADDR.pri              ; temp[7][32]
+                    //    MOVE.alt 
+                    //      LOAD.I 
+                    //         ADD 
+                    //    PUSH.pri 
+                    //      PUSH.C             
+                    //      PUSH.S              ; len
+                    //      PUSH.S              ; text[]
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; formatex
+                    //       STACK              ; free 11 cells
+                    //       STACK              ; free 233 cells
+                    //        RETN 
+}
+
+stock func_GetMatchTimeLeft()
+{
+	new iMatchTimeLeft
+	iMatchTimeLeft = floatround(get_pcvar_float(dod_cm_time) - (get_gametime() - fMatchStartTime))
+	return iMatchTimeLeft
+                    //        PROC              ; stock func_GetMatchTimeLeft()
+                    //       BREAK 
+                    //       BREAK 
+                    //                          ; new iMatchTimeLeft
+                    //       STACK              ; allocate 1 cells
+                    //      PUSH.C             
+                    //        PUSH              ; dod_cm_time
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; get_pcvar_num(dod_cm_time)
+                    //       STACK              ; free 2 cells
+                    //      SMUL.C             
+                    //    PUSH.pri 
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; Float:get_gametime()
+                    //       STACK              ; free 1 cells
+                    //    MOVE.alt 
+                    //    LOAD.pri              ; Float:fMatchStartTime
+                    //    PUSH.pri 
+                    //    PUSH.alt 
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; floatsub
+                    //       STACK              ; free 3 cells
+                    //     POP.alt 
+                    //    PUSH.pri 
+                    //    PUSH.alt 
+                    //      PUSH.C             
+                    //        CALL              ; stock Float:operator-(_:,Float:)(oper1,Float:oper2)
+                    //    PUSH.pri 
+                    //      PUSH.C             
+                    //    SYSREQ.C              ; floatround
+                    //       STACK              ; free 3 cells
+                    //  STOR.S.pri              ; iMatchTimeLeft
+                    //       BREAK 
+                    //  LOAD.S.pri              ; iMatchTimeLeft
+                    //    MOVE.alt 
+                    //    ZERO.pri 
+                    //       JSLEQ             
+                    //       BREAK 
+                    //      ZERO.S              ; iMatchTimeLeft
+                    //       BREAK 
+                    //  LOAD.S.pri              ; iMatchTimeLeft
+                    //       STACK              ; free 1 cells
+                    //        RETN 
 }
 
 public get_matchmaps()
@@ -632,6 +1351,7 @@ public plugin_cfg()
 	new cm_mapmode = get_pcvar_num(dod_cm_mapmode)
 	new cm_mapsplayed = get_pcvar_num(dod_cm_mapsplayed)
 	new clanmatch = get_pcvar_num(dod_clanmatch)
+	bFirstRound = true
 	if(get_cvar_num("mp_clan_match") == 1 && clanmatch == 1)
 	{
 		if((cm_mapmode == 1 && cm_mapsplayed < 2) || (cm_mapmode == 2 && cm_mapsplayed < 4))
@@ -1442,6 +2162,10 @@ public match_start()
 	}
 	if(get_cvar_num("mp_clan_match") == 1 && get_pcvar_num(dod_clanmatch) == 1 && matchrunning == 1)
 	{
+		if( bFirstRound )
+			bFirstRound = false
+		
+		fMatchStartTime = get_gametime()
 		if(get_pcvar_num(dod_cm_showtime) != 0)
 		{
 			new cm_showtime = get_pcvar_num(dod_cm_showtime)
