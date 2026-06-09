@@ -499,8 +499,8 @@ new pCvar_TimeVoice
 
 public plugin_init()
 {
-	register_plugin("DoD ClanMatch","0.9","AMXX DoD Team")
-	register_cvar("dod_clanmatch_plugin", "Version 0.9 by FeuerSturm | www.dodplugins.net", FCVAR_SERVER|FCVAR_SPONLY)
+	register_plugin("DoD ClanMatch","0.9-fy1","AMXX DoD Team")
+	register_cvar("dod_clanmatch_plugin", "Version 0.9-fy1 by FeuerSturm | www.dodplugins.net", FCVAR_SERVER|FCVAR_SPONLY)
 	register_statsfwd(XMF_SCORE)
 	register_concmd("amx_loaddodmatch","cmd_loaddodmatch",ADMIN_CVAR,"- loads your match settings from dod_matchbase.cfg")
 	register_concmd("amx_setdodmatcha","cmd_setdodmatcha",ADMIN_CVAR,"<map1> <map2> <mapmode> <time> <ff> <showtime> <showscore>")
